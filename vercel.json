@@ -2,9 +2,6 @@
   "version": 2,
   "buildCommand": "npm run setup && npm run build",
   "installCommand": "npm install",
-  "env": {
-    "DATABASE_URL": "@taskboard_database_url"
-  },
   "builds": [
     {
       "src": "frontend/vite.config.js",
