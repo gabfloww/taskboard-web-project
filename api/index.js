@@ -3,145 +3,52 @@ import cors from 'cors';
 
 const app = express();
 
-// CORS configuration for development and production
-const corsOrigin = process.env.NODE_ENV === 'production'
-  ? '*'
-  : 'http://localhost:5173';
-
-// Middleware
-app.use(cors({ origin: corsOrigin }));
+// CORS configuration
+app.use(cors());
 app.use(express.json());
 
-// Test endpoint
+// Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok' });
 });
 
-// Simple routes that don't require database
-app.get('/columns', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const columns = await db.column.findMany({ include: { tasks: true } });
-    res.json(columns);
-  } catch (err) {
-    console.error('Error fetching columns:', err);
-    res.status(500).json({ error: 'Failed to fetch columns', details: err.message });
-  }
+// Test columns endpoint
+app.get('/columns', (req, res) => {
+  res.json([]);
 });
 
-app.post('/columns', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const { title, color } = req.body;
-    const column = await db.column.create({
-      data: { title, color: color || '#6366f1', position: 0 },
-    });
-    res.json(column);
-  } catch (err) {
-    console.error('Error creating column:', err);
-    res.status(500).json({ error: 'Failed to create column', details: err.message });
-  }
+app.post('/columns', (req, res) => {
+  res.json({ id: 1, title: req.body.title || 'New Column', color: '#6366f1', position: 0 });
 });
 
-app.patch('/columns/:id', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const { id } = req.params;
-    const { title, color, position } = req.body;
-    const column = await db.column.update({
-      where: { id: parseInt(id) },
-      data: { ...(title && { title }), ...(color && { color }), ...(position !== undefined && { position }) },
-    });
-    res.json(column);
-  } catch (err) {
-    console.error('Error updating column:', err);
-    res.status(500).json({ error: 'Failed to update column', details: err.message });
-  }
+// Test tasks endpoint
+app.post('/tasks', (req, res) => {
+  res.json({ id: 1, title: req.body.title || 'New Task', columnId: 1, position: 0 });
 });
 
-app.delete('/columns/:id', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const { id } = req.params;
-    await db.column.delete({ where: { id: parseInt(id) } });
-    res.status(204).send();
-  } catch (err) {
-    console.error('Error deleting column:', err);
-    res.status(500).json({ error: 'Failed to delete column', details: err.message });
-  }
+app.patch('/tasks/:id', (req, res) => {
+  res.json({ id: parseInt(req.params.id), ...req.body });
 });
 
-app.post('/tasks', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const { title, description, priority, columnId } = req.body;
-    const task = await db.task.create({
-      data: { title, description, priority: priority || 'medium', columnId: parseInt(columnId), position: 0 },
-    });
-    res.json(task);
-  } catch (err) {
-    console.error('Error creating task:', err);
-    res.status(500).json({ error: 'Failed to create task', details: err.message });
-  }
+app.delete('/tasks/:id', (req, res) => {
+  res.status(204).send();
 });
 
-app.patch('/tasks/:id', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const { id } = req.params;
-    const { title, description, priority, columnId, position } = req.body;
-    const task = await db.task.update({
-      where: { id: parseInt(id) },
-      data: {
-        ...(title && { title }),
-        ...(description !== undefined && { description }),
-        ...(priority && { priority }),
-        ...(columnId && { columnId: parseInt(columnId) }),
-        ...(position !== undefined && { position }),
-      },
-    });
-    res.json(task);
-  } catch (err) {
-    console.error('Error updating task:', err);
-    res.status(500).json({ error: 'Failed to update task', details: err.message });
-  }
+app.post('/tasks/reorder', (req, res) => {
+  res.json({ success: true });
 });
 
-app.delete('/tasks/:id', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const { id } = req.params;
-    await db.task.delete({ where: { id: parseInt(id) } });
-    res.status(204).send();
-  } catch (err) {
-    console.error('Error deleting task:', err);
-    res.status(500).json({ error: 'Failed to delete task', details: err.message });
-  }
+app.patch('/columns/:id', (req, res) => {
+  res.json({ id: parseInt(req.params.id), ...req.body });
 });
 
-app.post('/tasks/reorder', async (req, res) => {
-  try {
-    const { db } = await import('../backend/src/db.js');
-    const { tasks } = req.body;
-    await Promise.all(
-      tasks.map((t) =>
-        db.task.update({
-          where: { id: t.id },
-          data: { position: t.position, columnId: t.columnId },
-        })
-      )
-    );
-    res.json({ success: true });
-  } catch (err) {
-    console.error('Error reordering tasks:', err);
-    res.status(500).json({ error: 'Failed to reorder tasks', details: err.message });
-  }
+app.delete('/columns/:id', (req, res) => {
+  res.status(204).send();
 });
 
-// Global error handler
+// Error handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error', details: err.message });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 export default app;
