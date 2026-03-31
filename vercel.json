@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "bash build.sh",
+  "buildCommand": "npm run setup:frontend && cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "functions": {
     "backend/api/index.js": {
