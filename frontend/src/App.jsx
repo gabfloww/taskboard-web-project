@@ -1,52 +1,83 @@
-import React, { useState } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCorners,
-} from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
-import { useBoard } from './hooks/useBoard.js';
-import { Column } from './components/Column.jsx';
-import { TaskCardOverlay } from './components/TaskCard.jsx';
-import { EditTaskModal } from './components/EditTaskModal.jsx';
-import { ConfirmDialog } from './components/ConfirmDialog.jsx';
+import React, { useState, useEffect } from 'react';
 import styles from './App.module.css';
 
 export default function App() {
-  const {
-    columns, loading, error,
-    addColumn, renameColumn, deleteColumn,
-    addTask, updateTask, deleteTask, moveTask,
-  } = useBoard();
+  const [apiStatus, setApiStatus] = useState('checking...');
+  const [columns, setColumns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState('');
 
-  const [activeTask, setActiveTask] = useState(null);
-  const [editingTask, setEditingTask] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null); // { type:'task'|'column', id, columnId? }
-  const [addingCol, setAddingCol] = useState(false);
-  const [newColTitle, setNewColTitle] = useState('');
-  const [newColColor, setNewColColor] = useState('#6366f1');
-  const [colSaving, setColSaving] = useState(false);
+  useEffect(() => {
+    // Test API connection
+    fetch('/api/health')
+      .then(r => r.json())
+      .then(d => setApiStatus('✅ API Connected'))
+      .catch(e => setApiStatus('❌ API Error: ' + e.message));
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
-  );
+    // Fetch columns
+    fetch('/api/columns')
+      .then(r => r.json())
+      .then(data => {
+        setColumns(data || []);
+        setLoading(false);
+      })
+      .catch(e => {
+        console.error(e);
+        setLoading(false);
+      });
+  }, []);
 
-  // ── DnD handlers ──────────────────────────────────────────
-  const handleDragStart = ({ active }) => {
-    if (active.data.current?.type === 'task') {
-      setActiveTask(active.data.current.task);
+  const handleAddColumn = async () => {
+    if (!title.trim()) return;
+    try {
+      const res = await fetch('/api/columns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      const col = await res.json();
+      setColumns([...columns, col]);
+      setTitle('');
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  const handleDragEnd = async ({ active, over }) => {
-    setActiveTask(null);
-    if (!over) return;
+  return (
+    <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
+      <h1>TaskBoard</h1>
+      <p style={{ fontSize: '18px' }}>{apiStatus}</p>
+      
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <div style={{ marginBottom: '20px' }}>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="New column title"
+              style={{ padding: '8px', marginRight: '8px' }}
+            />
+            <button onClick={handleAddColumn} style={{ padding: '8px 16px' }}>
+              Add Column
+            </button>
+          </div>
 
-    const activeData = active.data.current;
-    if (activeData?.type !== 'task') return;
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+            {columns.map((col) => (
+              <div key={col.id} style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', backgroundColor: col.color + '20' }}>
+                <h2>{col.title}</h2>
+                <p>{col.tasks?.length || 0} tasks</p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
     const task = activeData.task;
     const overId = over.id;
