@@ -3,6 +3,5 @@ backend/node_modules/
 frontend/node_modules/
 backend/prisma/dev.db
 backend/prisma/dev.db-journal
-backend/prisma/migrations/
 dist/
 .DS_Store
