@@ -1,6 +1,6 @@
 # TaskBoard
 
-A Trello-style task management app built with React, Node.js, and SQLite.
+A Task management app built with React, Node.js, and SQLite.
 
 ## Tech Stack
 
@@ -36,11 +36,11 @@ The app will be available at **http://localhost:5173**
 
 ## What You Can Do
 
-- ✅ Create, edit, and delete tasks
-- ✅ Drag tasks between columns
-- ✅ Add and customize columns with colors
-- ✅ Assign priority and description to tasks
-- ✅ All changes are saved to the database
+- Create, edit, and delete tasks
+- Drag tasks between columns
+- Add and customize columns with colors
+- Assign priority and description to tasks
+- All changes are saved to the database
 
 ## Project Structure
 
