@@ -6,10 +6,17 @@ A Task management app built with React, Node.js, and SQLite.
 
 - **Frontend**: React 18 + Vite
 - **Backend**: Node.js + Express
-- **Database**: SQLite with Prisma ORM
 - **Drag & Drop**: @dnd-kit
 
-## Getting Started
+## To Open
+
+## Option 1
+
+Copy and Paste to your browser: 
+https://taskboard-web-project-gabflores.vercel.app/
+
+
+## Option 2
 
 ### 1. Install Dependencies & Set Up Database
 
@@ -40,23 +47,7 @@ The app will be available at **http://localhost:5173**
 - Drag tasks between columns
 - Add and customize columns with colors
 - Assign priority and description to tasks
-- All changes are saved to the database
 
-## Project Structure
-
-```
-backend/          # Express API server
-├── src/
-│   ├── index.js  # Main server
-│   └── routes/   # API endpoints
-└── prisma/       # Database schema
-
-frontend/         # React + Vite app
-├── src/
-│   ├── components/  # UI components
-│   ├── hooks/       # Custom hooks
-│   └── api.js       # API client
-```
 
 ## Scripts
 
