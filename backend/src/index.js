@@ -6,8 +6,13 @@ import taskRoutes from './routes/tasks.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// CORS configuration for development and production
+const corsOrigin = process.env.NODE_ENV === 'production'
+  ? process.env.VERCEL_URL || '*'
+  : 'http://localhost:5173';
+
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 
 // Routes
